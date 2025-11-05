@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dept Events & Trainings</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617; /* bg-slate-950 */
+            overflow: hidden; /* This line removes the scrollbar from the body */
+        }
+        /* Custom styles for the feed view */
+        .event-card {
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            border: 1px solid #1e293b; /* border-slate-800 */
+        }
+        .event-card:hover {
+            transform: translateY(-2px);
+            background-color: #1e293b; /* bg-slate-800 */
+        }
+        /* Keyframes for the shimmer animation on skeleton loaders */
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        .skeleton-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0,
+                rgba(255, 255, 255, 0.03) 20%,
+                rgba(255, 255, 255, 0.08) 60%,
+                rgba(255, 255, 255, 0)
+            );
+            animation: shimmer 1.8s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 antialiased">
+
+    <!-- === MAIN CONTAINER UPDATED === -->
+    <!-- Removed max-w-7xl, container, mx-auto and changed min-h-screen to h-screen to fill the viewport -->
+    <div class="w-full h-screen p-6 md:p-8 flex flex-col">
+        
+        <!-- === HEADER UPDATED === -->
+        <!-- Removed 'text-center' and added 'text-left' to align title and subtitle -->
+        <header class="p-6 mb-12 flex-shrink-0 bg-slate-900 rounded-lg shadow-lg text-left border border-slate-800">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">MEETINGS, TRAININGS, AND EVENTS</h1>
+        </header>
+        <!-- === END HEADER UPDATE === -->
+
+        <!-- Configuration Section (hidden, but holds the credentials) -->
+        <div class="hidden">
+            <input type="password" id="apiKey" value="AIzaSyA3GRJ6eD0DSVkk0eblWxvNAspvELfEXPU">
+            <!-- === MODIFICATION: Updated the calendar ID === -->
+            <input type="email" id="calendarId" value="psjq9llj3ss5k3mqupp8f2vj7blan3ha@import.calendar.google.com">
+        </div>
+        
+        <!-- Main content area -->
+        <!-- === MAIN CONTENT UPDATED === -->
+        <!-- Removed 'overflow-y-auto' and 'pr-2' to prevent scrolling -->
+        <main class="flex-grow">
+            <!-- Events will be displayed here in a two-column grid format -->
+            <div id="events-container" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <!-- Skeleton Loader -->
+                 <div id="events-placeholder" class="grid grid-cols-1 md:grid-cols-2 gap-8 col-span-2">
+                    <!-- We repeat this block for a nice loading effect -->
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <!-- === MODIFICATION: Added more skeleton loaders to match the 10-event limit === -->
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[1Player 1s turn] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                    <div class="relative overflow-hidden flex items-start gap-6 p-6 min-h-[150px] bg-slate-900 rounded-lg border border-slate-800 skeleton-shimmer">
+                        <div class="flex-shrink-0 w-20 h-20 bg-slate-800 rounded-md mt-1"></div>
+                        <div class="flex-grow space-y-3 pt-1">
+                            <div class="h-6 bg-slate-800 rounded w-3/4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-1/2"></div>
+                            <div class="h-5 bg-slate-800 rounded w-full mt-4"></div>
+                            <div class="h-5 bg-slate-800 rounded w-2/3"></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const apiKeyInput = document.getElementById('apiKey');
+            const calendarIdInput = document.getElementById('calendarId');
+            const eventsContainer = document.getElementById('events-container');
+            const eventsPlaceholder = document.getElementById('events-placeholder');
+            
+            let allEvents = []; // Store all fetched events here
+
+            // Helper function to get parts of the date
+            function getDateParts(eventStart) {
+                const dateStr = eventStart?.date || eventStart?.dateTime;
+                if (!dateStr) return { month: '', day: '', time: 'Time TBD' };
+                
+                const date = new Date(dateStr);
+                const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                const day = date.toLocaleDateString('en-US', { day: '2-digit' });
+
+                let time = 'All-Day';
+                if (eventStart.dateTime) {
+                    time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                }
+                
+                return { month, day, time };
+            }
+
+            // This function renders the events into the feed
+            function renderEvents() {
+                eventsContainer.innerHTML = ''; // Clear everything including the placeholder
+
+                if (allEvents.length === 0) {
+                    eventsContainer.innerHTML = `
+                        <div class="col-span-1 md:col-span-2 text-center py-20 px-6 bg-slate-900 rounded-lg border border-slate-800">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-slate-600 mb-4"><path d="M12.5 22h-6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m21.7 17.8-1.1-1.1a1 1 0 0 0-1.5 0l-1 1a1 1 0 0 0 0 1.5l1.1 1.1c.4.4 1 .4 1.5 0l1-1a1 1 0 0 0 0-1.5z"></path><path d="m16 22 3-3"></path></svg>
+                            <h2 class="text-2xl font-semibold text-white">No Upcoming Events</h2>
+                            <p class="text-slate-400 mt-2 text-lg">Please check back later for new events.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                for (const event of allEvents) {
+                    if (!event.summary) continue;
+
+                    // === MODIFICATION: Remove the specific string from the event summary ===
+                    const stringToRemove = "@ Pleasant Township Fire Department";
+                    const displaySummary = event.summary.replace(stringToRemove, "").trim();
+                    // If after replacement the summary is empty, you might want to skip it or give a default title
+                    if (!displaySummary) continue; // Or use: displaySummary = "Untitled Event";
+
+                    const eventItem = document.createElement('div');
+                    // Changed to items-start for better alignment with description
+                    eventItem.className = 'event-card bg-slate-900 rounded-lg flex items-start p-6 gap-6'; 
+                    
+                    const { month, day, time } = getDateParts(event.start);
+                    const locationText = event.location || 'Remote / TBD';
+                    const description = event.description; // Get the description
+                    
+                    const timeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1.5 align-middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+                    const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1.5 align-middle"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+
+                    eventItem.innerHTML = `
+                        <!-- Date Block -->
+                        <div class="date-block text-center flex-shrink-0 w-20 bg-slate-800/70 rounded-lg p-3 border border-slate-700">
+                            <p class="month text-sm font-bold text-cyan-400 tracking-wider">${month || 'TBD'}</p>
+                            <p class="day text-4xl font-extrabold text-white tracking-tight">${day || '--'}</p>
+                        </div>
+                        
+                        <!-- Event Details -->
+                        <div class="details flex-grow">
+                            <!-- === MODIFICATION: Use the cleaned 'displaySummary' variable === -->
+                            <h3 class="font-bold text-white text-lg md:text-xl leading-tight">${displaySummary}</h3>
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-base text-slate-400 mt-2">
+                                <span class="flex items-center">${timeIcon} ${time}</span>
+                                <span class="flex items-center mt-1 sm:mt-0">${locationIcon} ${locationText}</span>
+                            </div>
+                            <!-- === FIX: Completed this template literal line === -->
+                            ${description ? `<p class="text-base text-slate-400 mt-4 prose prose-invert max-w-none">${description}</p>` : ''}
+                        </div>
+                    `;
+                    eventsContainer.appendChild(eventItem);
+                }
+            }
+
+            async function loadEvents() {
+                const apiKey = apiKeyInput.value.trim();
+                const calendarId = calendarIdInput.value.trim();
+
+                if (!apiKey || !calendarId) {
+                    eventsContainer.innerHTML = '<p class="text-red-500 col-span-2">API Key or Calendar ID is missing.</p>';
+                    return;
+                }
+                
+                const timeMin = new Date().toISOString();
+                const apiUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?key=${apiKey}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime`;
+
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`Google Calendar API error: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+                    
+                    //<!-- === MODIFICATION: Removed the filter logic === -->
+                    
+                    //<!-- === MODIFICATION: Reverted to slicing the original data.items === -->
+                    allEvents = (data.items || []).slice(0, 10);
+                    renderEvents();
+                } catch (error) {
+                    console.error('Error fetching calendar events:', error);
+                    eventsContainer.innerHTML = `
+                        <div class="col-span-1 md:col-span-2 text-center py-20 px-6 bg-slate-900 rounded-lg border border-red-900/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-500 mb-4"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <h2 class="text-2xl font-semibold text-white">Failed to Load Events</h2>
+                            <p class="text-slate-400 mt-2 text-lg">There was an error connecting to the Google Calendar API.</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            loadEvents();
+        });
+    </script>
+</body>
+</html>

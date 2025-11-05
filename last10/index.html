@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last 10 Runs</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple styling for the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Animation for cards floating up */
+        @keyframes floatUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .float-up-animation {
+            opacity: 0; /* Start hidden */
+            animation: floatUp 0.5s ease-out forwards;
+        }
+    </style>
+    <!-- Add Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Load PapaParse library from jsdelivr CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Wait for the DOM to be fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Google Sheet URL
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFwKf1UaKCKLASXnjnKprBD_dUoNxfj2ypNjC5x_vAzO6AmNJagIe86-uTkvGs_2xsXUthRDydbayG/pub?gid=515267348&single=true&output=csv';
+
+            // Get elements
+            const runsList = document.getElementById('runs-list');
+            const runsListContainer = document.getElementById('runs-list-container');
+            const loadingMessage = document.getElementById('loading-message');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            
+            // Define the specific headers we need
+            const headersToDisplay = {
+                "Incident Number": "Incident Number",
+                "Reported": "Reported",
+                "Nature": "Nature",
+                "Incident Address": "Incident Address"
+            };
+
+            // Check if PapaParse is loaded
+            if (typeof Papa === 'undefined') {
+                console.error("PapaParse library is not loaded.");
+                loadingMessage.style.display = 'none';
+                errorText.textContent = 'Error: Could not load data parsing library. Please check your internet connection or ad blocker.';
+                errorMessage.style.display = 'block';
+                return; // Stop execution
+            }
+
+            // Use PapaParse to fetch and parse the CSV
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true, // Use the first row as headers
+                skipEmptyLines: true,
+                complete: function(results) {
+                    try {
+                        let data = results.data;
+                        
+                        // Check if data was loaded and headers exist
+                        if (!data || data.length === 0) {
+                            throw new Error("No data found in the CSV.");
+                        }
+
+                        // Verify that our required headers are present
+                        const csvHeaders = results.meta.fields;
+                        for (const key in headersToDisplay) {
+                            if (!csvHeaders.includes(key)) {
+                                throw new Error(`Missing required header: "${key}"`);
+                            }
+                        }
+
+                        // --- Data sorting logic ---
+                        data.sort((a, b) => {
+                            const dateA = new Date(a.Reported);
+                            const dateB = new Date(b.Reported);
+                            if (isNaN(dateA)) return 1;
+                            if (isNaN(dateB)) return -1;
+                            return dateB - dateA; // Sort descending (most recent first)
+                        });
+                        // --- End sorting logic ---
+
+                        // Get the first 10 rows from the *sorted* data
+                        const last10Runs = data.slice(0, 10);
+
+                        // Clear the list
+                        runsList.innerHTML = '';
+
+                        // --- MODIFICATION: Populate the list with cards (DARK THEME) ---
+                        last10Runs.forEach((run, index) => {
+                            const card = document.createElement('div');
+                            // Card styling - Dark theme, new hover effect, animation
+                            card.className = 'bg-slate-800 p-3 rounded-lg shadow border border-slate-700 transition-colors duration-200 hover:bg-slate-700 float-up-animation';
+                            // Add animation delay for a staggered effect
+                            card.style.animationDelay = `${index * 0.05}s`;
+                            
+                            const runNumber = run[headersToDisplay['Incident Number']] || 'N/A';
+                            const reported = run[headersToDisplay['Reported']] || 'N/A';
+                            const nature = run[headersToDisplay['Nature']] || 'N/A';
+                            const address = run[headersToDisplay['Incident Address']] || 'N/A';
+
+                            // --- FONT SIZE INCREASED ---
+                            // Card inner HTML structure - Updated text colors for dark theme
+                            card.innerHTML = `
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-1 pb-1 border-b border-slate-700">
+                                    <div class="text-3xl font-semibold text-slate-400">
+                                        RUN #${runNumber}
+                                    </div>
+                                    <div class="text-3xl text-slate-400 mt-1 sm:mt-0">
+                                        ${reported}
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="text-4xl font-semibold text-red-500 mb-1">${nature}</h3>
+                                    <p class="text-3xl text-slate-300">${address}</p>
+                                </div>
+                            `;
+                            // --- END FONT SIZE INCREASE ---
+                            
+                            runsList.appendChild(card);
+                        });
+                        // --- END MODIFICATION ---
+
+                        // Hide loading message and show the list
+                        loadingMessage.style.display = 'none';
+                        runsListContainer.style.display = 'block';
+
+                    } catch (error) {
+                        console.error('Error processing data:', error);
+                        loadingMessage.style.display = 'none';
+                        errorText.textContent = `Error: ${error.message}`;
+                        errorMessage.style.display = 'block';
+                    }
+                },
+                error: function(error, file) {
+                    console.error('Error fetching or parsing CSV:', error);
+                    loadingMessage.style.display = 'none';
+                    errorText.textContent = 'Error: Could not load data from the specified URL.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</head>
+<!-- DARK THEME: Updated background and default text color -->
+<body class="bg-slate-900 min-h-screen antialiased text-slate-200">
+
+    <!-- FULL WIDTH: Removed container, max-w-7xl, and p-4. Added p-2 for spacing. -->
+    <div class="p-2">
+        <!-- HEADER UPDATED: Matched style from the provided example -->
+        <header class="p-6 mb-6 bg-slate-800 rounded-lg shadow-lg">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-100">LAST 10 INCIDENTS</h1>
+        </header>
+        
+        <!-- Loading Message - DARK THEME: Updated colors & FONT SIZE INCREASED -->
+        <div id="loading-message" class="bg-slate-800 rounded-xl shadow-lg p-6 text-center text-3xl text-slate-400 max-w-lg mx-auto">
+            <!-- Updated spinner color -->
+            <svg class="animate-spin h-6 w-6 text-red-500 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Loading incident data...
+        </div>
+
+        <!-- Error Message - DARK THEME: Updated colors & FONT SIZE INCREASED -->
+        <div id="error-message" class="hidden bg-slate-800 rounded-xl shadow-lg p-6 text-center text-red-400 max-w-lg mx-auto">
+            <div class="flex items-center justify-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-8 w-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <strong id="error-text" class="text-3xl">Could not load data.</strong>
+            </div>
+        </div>
+
+        <!-- Runs list will be built here -->
+        <!-- This container starts hidden and is shown on success -->
+        <div id="runs-list-container" class="hidden">
+            <!-- 
+                Grid layout for the cards.
+                - 1 column on small screens
+                - 2 columns on medium screens, filling column-first
+            -->
+            <div id="runs-list" class="grid grid-cols-1 md:grid-flow-col md:grid-cols-2 md:grid-rows-5 gap-2">
+                <!-- Run cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+        
+    </div>
+    
+</body>
+</html>
