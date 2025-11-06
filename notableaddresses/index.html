@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Use a clean, professional sans-serif font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display.swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Apply the professional font */
         body {
@@ -38,11 +38,29 @@
 <body class="bg-gray-900 text-gray-100 p-4 md:p-8">
 
     <!-- Updated header to match the style of header.html -->
-    <header class="p-6 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-6xl mx-auto">
+    <!-- Removed max-w-6xl and mx-auto to allow full width -->
+    <header class="p-6 mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100">Notable Addresses</h1>
+        
+        <!-- Color Legend -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2 mt-4">
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full bg-red-900/80 border border-red-700"></span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">High Priority</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full bg-yellow-900/80 border border-yellow-700"></span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">Medium Priority</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full bg-green-900/80 border border-green-700"></span>
+                <span class="text-sm text-gray-600 dark:text-gray-300">General / Low Priority</span>
+            </div>
+        </div>
     </header>
 
-    <main class="max-w-6xl mx-auto">
+    <!-- Removed max-w-6xl and mx-auto to allow full width -->
+    <main>
         <!-- Message area for loading or no notes -->
         <div id="message-area" class="text-center p-6 bg-gray-800 rounded-lg shadow-md hidden">
             <p id="message-text" class="text-xl text-gray-300"></p>
@@ -205,7 +223,7 @@
             `;
             // A hack to fix Tailwind's CSS purging issue with dynamic classes
             noteElement.children[0].className = 'p-5 flex-grow';
-            noteElement.children[1].className = `p-4 bg-gray-800/50 border-t ${borderColor}`;
+            noteElement.children[1].className = `p-4 bg-gray-800/5G-213LH7WH40/50 border-t ${borderColor}`;
 
             notesList.appendChild(noteElement);
         }
