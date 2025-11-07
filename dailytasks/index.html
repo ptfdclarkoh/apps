@@ -17,7 +17,7 @@
             },
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display.swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -133,10 +133,13 @@
                     allTasks.push(doc.data());
                 });
 
-                // Filter in JavaScript to find tasks for today OR marked as "Daily"
+                // === MODIFICATION: Filter based on array ===
+                // Filter in JavaScript to find tasks where 'day' array
+                // includes today OR "Daily"
                 const todayTasks = allTasks.filter(task => 
-                    task.day === today || task.day === "Daily"
+                    Array.isArray(task.day) && (task.day.includes(today) || task.day.includes("Daily"))
                 );
+                // === END MODIFICATION ===
 
                 if (todayTasks.length === 0) {
                     showMessage("No tasks for today. Enjoy your day!", false);
