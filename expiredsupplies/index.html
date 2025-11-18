@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expiring Equipment Tracker</title>
+    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple animation for card appearance */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .item-card {
+            animation: fadeIn 0.5s ease-out;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+        .loader {
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            border-top: 6px solid #3b82f6; /* Blue-500 */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1.5s linear infinite;
+            margin: 50px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="p-6 mb-8 bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">EXPIRING EQUIPMENT</h1>
+                <p class="text-gray-400 mt-2 text-lg">Nearing Expiration of EMS Items on Apparatus</p>
+            </div>
+            
+            <!-- Legend -->
+            <div class="flex flex-col sm:flex-row gap-4 bg-gray-900/50 p-4 rounded-md border border-gray-700">
+                <div class="flex items-center gap-3">
+                    <span class="w-4 h-4 rounded-full bg-red-900/80 border border-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
+                    <span class="text-sm font-medium text-gray-300">Expired / &le; 10 Days</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-4 h-4 rounded-full bg-yellow-900/80 border border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.4)]"></span>
+                    <span class="text-sm font-medium text-gray-300">11 - 30 Days</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Loading Spinner -->
+        <div id="loader" class="loader"></div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden p-6 bg-red-900/30 border border-red-800 rounded-lg text-center text-red-200"></div>
+
+        <!-- Grid Container (Replacing the Table) -->
+        <div id="equipment-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- Cards will be injected here -->
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQvehD2VrDGHZF88cf0YkKsBut1yfQai-Ast-mgfNAEqgWEfVdBPhqeheb9qwhsIn9dtvdjkTLzg8Z1/pub?gid=1338114085&single=true&output=csv';
+            const loader = document.getElementById('loader');
+            const equipmentGrid = document.getElementById('equipment-grid');
+            const errorMessage = document.getElementById('error-message');
+
+            async function fetchSheetData() {
+                try {
+                    const response = await fetch(sheetUrl);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const csvText = await response.text();
+                    const data = parseCSV(csvText);
+                    displayData(data);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    loader.style.display = 'none';
+                    errorMessage.textContent = 'Failed to load data. Please check connections.';
+                    errorMessage.style.display = 'block';
+                }
+            }
+
+            function parseCSV(text) {
+                const lines = text.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+                const parseLine = (line) => {
+                    const values = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            if (inQuotes && i < line.length - 1 && line[i+1] === '"') {
+                                current += '"'; i++;
+                            } else { inQuotes = !inQuotes; }
+                        } else if (char === ',' && !inQuotes) {
+                            values.push(current); current = '';
+                        } else { current += char; }
+                    }
+                    values.push(current);
+                    return values;
+                };
+
+                if (lines.length < 1) return [];
+                const headers = parseLine(lines[0]).map(h => h.trim());
+                
+                return lines.slice(1).map(line => {
+                    if (!line.trim()) return null;
+                    const values = parseLine(line);
+                    if (values.length !== headers.length) return null;
+                    const rowObject = {};
+                    headers.forEach((header, i) => rowObject[header] = (values[i] || '').trim());
+                    return rowObject;
+                }).filter(row => row !== null);
+            }
+            
+            function displayData(data) {
+                equipmentGrid.innerHTML = ''; 
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // 1. Filter
+                const validRows = data.filter(row => {
+                    const essentialFields = ["Apparatus", "Location", "Equipment", "Expires"];
+                    if (essentialFields.some(field => !row[field])) return false;
+
+                    const expirationDate = new Date(row.Expires);
+                    if (isNaN(expirationDate.getTime())) return false;
+
+                    expirationDate.setHours(0, 0, 0, 0);
+                    const timeDiff = expirationDate.getTime() - today.getTime();
+                    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    
+                    row._dayDiff = dayDiff;
+                    return dayDiff <= 30;
+                });
+
+                // 2. Sort (Oldest Expired First)
+                validRows.sort((a, b) => {
+                    const dateA = new Date(a.Expires);
+                    const dateB = new Date(b.Expires);
+                    return dateA - dateB;
+                });
+
+                // 3. Render Cards
+                validRows.forEach(row => {
+                    const dayDiff = row._dayDiff;
+                    let bgColorClass = '';
+                    let borderColorClass = '';
+                    let statusText = '';
+                    let statusColor = '';
+
+                    // Determine styles based on urgency
+                    if (dayDiff <= 10) {
+                        // Critical / Expired
+                        bgColorClass = 'bg-red-900/40 hover:bg-red-900/60';
+                        borderColorClass = 'border-red-700';
+                        statusColor = 'text-red-400';
+                        statusText = dayDiff < 0 ? `Expired ${Math.abs(dayDiff)} days ago` : `Expires in ${dayDiff} days`;
+                        if (dayDiff === 0) statusText = "Expires Today";
+                    } else {
+                        // Warning
+                        bgColorClass = 'bg-yellow-900/40 hover:bg-yellow-900/60';
+                        borderColorClass = 'border-yellow-700';
+                        statusColor = 'text-yellow-400';
+                        statusText = `Expires in ${dayDiff} days`;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `item-card flex flex-col justify-between rounded-xl border ${borderColorClass} ${bgColorClass} p-5 shadow-lg`;
+
+                    const apparatus = row.Apparatus || 'Unknown App';
+                    const location = row.Location || 'Unknown Loc';
+                    const subLocation = row.SubLocation ? `(${row.SubLocation})` : '';
+                    const equipment = row.Equipment || 'Unknown Item';
+                    const notes = row.Notes || '';
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="text-xs font-bold uppercase tracking-wider text-gray-400 bg-gray-800/80 px-2 py-1 rounded">
+                                    ${apparatus}
+                                </div>
+                                <div class="text-xs font-bold ${statusColor} bg-gray-800/80 px-2 py-1 rounded border border-gray-700">
+                                    ${row.Expires}
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-white mb-1 leading-tight">${equipment}</h3>
+                            <p class="text-sm text-gray-300 mb-4 font-medium">${location} ${subLocation}</p>
+                            
+                            ${notes ? `<div class="bg-gray-800/50 p-3 rounded border border-gray-700/50">
+                                <p class="text-xs text-gray-400 uppercase mb-1">Notes</p>
+                                <p class="text-sm text-gray-200 italic">"${notes}"</p>
+                            </div>` : ''}
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-end">
+                            <span class="text-xs text-gray-500 font-mono">ID: ${Math.random().toString(36).substr(2, 6).toUpperCase()}</span>
+                            <span class="text-sm font-bold ${statusColor}">${statusText}</span>
+                        </div>
+                    `;
+
+                    equipmentGrid.appendChild(card);
+                });
+
+                loader.style.display = 'none';
+                equipmentGrid.style.display = 'grid'; // Show grid
+                equipmentGrid.classList.remove('hidden');
+            }
+
+            fetchSheetData();
+        });
+    </script>
+</body>
+</html>
