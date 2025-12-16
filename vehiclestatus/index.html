@@ -156,8 +156,18 @@
                 return;
             }
             
-            // Sort data by reported timestamp (most recent first)
+            // Sort data: 'OOS' first, then by reported timestamp (most recent first)
             unitData.sort((a, b) => {
+                // Check for 'OOS' status
+                const statusA = (a.status || '').trim();
+                const statusB = (b.status || '').trim();
+                const isOOS_A = statusA === 'OOS';
+                const isOOS_B = statusB === 'OOS';
+
+                // Prioritize 'OOS'
+                if (isOOS_A && !isOOS_B) return -1;
+                if (!isOOS_A && isOOS_B) return 1;
+
                 // Get milliseconds from timestamp, default to 0 if null/undefined
                 const timeA = a.reported?.toMillis() || 0;
                 const timeB = b.reported?.toMillis() || 0;
