@@ -125,6 +125,63 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
+        // --- Holiday Data (Late 2025 - Early 2026) ---
+        const HOLIDAYS = {
+            // December 2025
+            '2025-12-22': 'National Cookie Exchange Day',
+            '2025-12-23': 'Festivus',
+            '2025-12-24': 'Christmas Eve',
+            '2025-12-25': 'Christmas Day',
+            '2025-12-26': 'Kwanzaa Begins',
+            '2025-12-27': 'National Fruitcake Day',
+            '2025-12-28': 'Card Playing Day',
+            '2025-12-29': 'Tick Tock Day',
+            '2025-12-30': 'National Bacon Day',
+            '2025-12-31': 'New Year\'s Eve',
+            
+            // January 2026
+            '2026-01-01': 'New Year\'s Day',
+            '2026-01-02': 'Science Fiction Day',
+            '2026-01-03': 'Festival of Sleep Day',
+            '2026-01-04': 'National Trivia Day',
+            '2026-01-05': 'National Bird Day',
+            '2026-01-06': 'Three Kings Day',
+            '2026-01-07': 'National Tempura Day',
+            '2026-01-08': 'Bubble Bath Day',
+            '2026-01-09': 'National Apricot Day',
+            '2026-01-10': 'Houseplant Appreciation Day',
+            '2026-01-11': 'National Milk Day',
+            '2026-01-12': 'Kiss A Ginger Day',
+            '2026-01-13': 'Rubber Ducky Day',
+            '2026-01-14': 'Dress Up Your Pet Day',
+            '2026-01-15': 'National Hat Day',
+            '2026-01-16': 'National Nothing Day',
+            '2026-01-17': 'Ditch Resolutions Day',
+            '2026-01-18': 'Thesaurus Day',
+            '2026-01-19': 'Martin Luther King Jr. Day',
+            '2026-01-20': 'Cheese Lover\'s Day',
+            '2026-01-21': 'National Hugging Day',
+            '2026-01-22': 'Blonde Brownie Day',
+            '2026-01-23': 'National Pie Day',
+            '2026-01-24': 'Peanut Butter Day',
+            '2026-01-25': 'Opposite Day',
+            '2026-01-26': 'Spouses Day',
+            '2026-01-27': 'Chocolate Cake Day',
+            '2026-01-28': 'National Lego Day',
+            '2026-01-29': 'National Puzzle Day',
+            '2026-01-30': 'National Croissant Day',
+            '2026-01-31': 'Hot Chocolate Day',
+
+            // February 2026 (Just in case)
+            '2026-02-01': 'Dark Chocolate Day',
+            '2026-02-02': 'Groundhog Day',
+            '2026-02-14': 'Valentine\'s Day'
+        };
+
+        function getHoliday(dateStr) {
+            return HOLIDAYS[dateStr] || null;
+        }
+
         // --- Clock Logic ---
         function updateClock() {
             const now = new Date();
@@ -267,6 +324,7 @@
                         const isToday = dayGroup.date === todayStr;
                         const isYesterday = dayGroup.date === yesterdayStr;
                         const dateObj = formatDateObj(dayGroup.date);
+                        const holidayName = getHoliday(dayGroup.date);
                         
                         const sortedTimes = Object.keys(dayGroup.shifts).sort();
 
@@ -314,10 +372,20 @@
                                 
                                 <!-- Card Header -->
                                 <div class="p-6 pb-4 flex justify-between items-start border-b border-white/5 bg-white/[0.02]">
-                                    <div class="flex flex-col">
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-5xl font-bold text-white tracking-tighter">${dateObj.day}</span>
-                                            <span class="text-lg font-bold text-zinc-500">${dateObj.month}</span>
+                                    <div class="flex flex-col w-full">
+                                        <div class="flex items-baseline justify-between w-full">
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-5xl font-bold text-white tracking-tighter">${dateObj.day}</span>
+                                                <span class="text-lg font-bold text-zinc-500">${dateObj.month}</span>
+                                            </div>
+                                            <!-- Holiday Badge (if exists) -->
+                                            ${holidayName ? 
+                                                `<div class="max-w-[120px] text-right">
+                                                    <span class="px-2 py-1 rounded bg-indigo-500/10 text-indigo-300 text-[10px] font-bold uppercase tracking-wide border border-indigo-500/20 leading-tight inline-block text-right">
+                                                        ${holidayName}
+                                                    </span>
+                                                </div>` 
+                                            : ''}
                                         </div>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span class="text-indigo-400 font-medium tracking-wide uppercase text-sm">${dateObj.weekday}</span>
